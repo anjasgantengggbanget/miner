@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Admin Panel - Solana Miner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      async function fetchDeposits() {
+        const res = await fetch('/api/admin?action=deposits&token=secretadmin123');
+        const data = await res.json();
+        const list = document.getElementById('deposits');
+        list.innerHTML = data.map(d => `
+          <div class="p-2 bg-gray-800 rounded mb-2">
+            <p><strong>User:</strong> ${d.user_id}</p>
+            <p><strong>Amount:</strong> ${d.amount}</p>
+            <p><strong>Status:</strong> ${d.status}</p>
+            <button onclick="approve('${d._id}', 'deposit')" class="bg-green-500 px-2 py-1 rounded mt-1">Approve</button>
+            <button onclick="reject('${d._id}', 'deposit')" class="bg-red-500 px-2 py-1 rounded mt-1">Reject</button>
+          </div>
+        `).join('');
+      }
+
+      async function approve(id, type) {
+        await fetch('/api/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, type, action: 'approve', token: 'secretadmin123' })
+        });
+        location.reload();
+      }
+
+      async function reject(id, type) {
+        await fetch('/api/admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, type, action: 'reject', token: 'secretadmin123' })
+        });
+        location.reload();
+      }
+
+      window.onload = fetchDeposits;
+    </script>
+  </head>
+  <body class="bg-black text-white p-6">
+    <h1 class="text-2xl font-bold mb-4">🛠 Admin Panel</h1>
+    <h2 class="text-xl mb-2">Pending Deposits</h2>
+    <div id="deposits"></div>
+  </body>
+</html>
